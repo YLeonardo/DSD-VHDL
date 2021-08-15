@@ -1,0 +1,48 @@
+LIBRARY IEEE;
+USE IEEE.std_logic_1164.all;
+ENTITY REG IS
+	PORT(CLK,CLR,ECD,ECI: IN STD_LOGIC;
+		 C: IN STD_LOGIC_VECTOR(1 DOWNTO 0);
+		 DATO: IN STD_LOGIC_VECTOR(7 DOWNTO 0);
+		 Q: INOUT STD_LOGIC_VECTOR(7 DOWNTO 0)
+		 );
+	END ENTITY;
+
+ARCHITECTURE A_REG OF REG IS
+SIGNAL AUX: STD_LOGIC_VECTOR (7 DOWNTO 0);
+BEGIN
+	MUX: PROCESS (C)
+	BEGIN
+	CASE C IS 
+		WHEN "00" => AUX <= DATO;
+		WHEN "01" => 
+		             FOR I IN 0 TO 7 LOOP
+					    IF(I=7) THEN
+								AUX(I)<= ECD;
+							ELSE
+								AUX(I)<= Q(I+1);
+							END IF;
+						END LOOP;
+		WHEN "10" => 
+		             FOR I IN 7 DOWNTO 0 LOOP
+					 IF (I=0) THEN
+								AUX(I)<= ECI;
+							ELSE
+								AUX(I)<= Q(I-1);
+							END IF;
+						END LOOP;
+		WHEN OTHERS=>AUX<=Q;
+		END CASE;
+		END PROCESS MUX;
+
+		PROCESS(CLK,CLR)
+		BEGIN
+
+		IF(CLR='0') THEN
+		Q<="00000000";
+		ELSIF(CLK'EVENT AND CLK='1') THEN
+		Q<=AUX;
+		END IF;
+		END PROCESS;
+		END A_REG;
+		
